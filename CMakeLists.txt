@@ -4,7 +4,7 @@ cmake_minimum_required (VERSION 3.22 FATAL_ERROR)
 
 project (
     FFmpeg
-    VERSION 2.24.0
+    VERSION 4.4.1
     DESCRIPTION "CMake build of FFmpeg"
     HOMEPAGE_URL "https://www.ffmpeg.org/"
     LANGUAGES NONE) # FFmpeg is built using make shell commands, so within CMake we don't need to
@@ -180,11 +180,13 @@ install (EXPORT FFmpegTargets NAMESPACE ffmpeg:: DESTINATION "${FFMPEG_INSTALL_D
 
 include (CMakePackageConfigHelpers)
 
-write_basic_package_version_file (ffmpeg-config-version.cmake VERSION "${PROJECT_VERSION}"
+write_basic_package_version_file (ffmpeg-config-version.cmake
+                                  VERSION "${PROJECT_VERSION}"
                                   COMPATIBILITY SameMajorVersion)
 
 configure_package_config_file (cmake/ffmpeg-config.cmake ffmpeg-config.cmake
-                               INSTALL_DESTINATION "${FFMPEG_INSTALL_DEST}" NO_SET_AND_CHECK_MACRO)
+                               INSTALL_DESTINATION "${FFMPEG_INSTALL_DEST}"
+                               NO_SET_AND_CHECK_MACRO)
 
 install (FILES "${CMAKE_CURRENT_BINARY_DIR}/ffmpeg-config-version.cmake"
                "${CMAKE_CURRENT_BINARY_DIR}/ffmpeg-config.cmake"

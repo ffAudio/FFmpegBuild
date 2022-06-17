@@ -1,0 +1,50 @@
+name: FFmpeg build
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+  schedule:
+    - cron: 0 0 * * 1
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  build:
+
+    name: ${{ matrix.os }} ${{ matrix.config }} 
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        config: [Debug, Release]
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+
+    steps:
+
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 1
+
+    - name: Configure CMake
+      run: cmake -B Builds
+
+    - name: Run build 
+      run: cmake --build Builds --config ${{ matrix.config }}
+
+    - name: Create install tree
+      run: cmake --install Builds --prefix deploy
+
+    - name: Upload debug artefacts
+      uses: actions/upload-artifact@v3
+      with:
+          name: ${{ matrix.os }}.${{ matrix.config }}
+          path: deploy
+          if-no-files-found: error
+

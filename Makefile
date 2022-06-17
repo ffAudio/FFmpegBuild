@@ -9,8 +9,6 @@ SHELL := /bin/sh
 
 CMAKE ?= cmake
 RM = $(CMAKE) -E rm -rf
-PRECOMMIT ?= pre-commit
-GIT ?= git
 
 BUILDS ?= Builds
 CACHE ?= Cache
@@ -27,16 +25,8 @@ help:  ## Print this message
 
 #
 
-.PHONY: init
-init:  ## Initializes the workspace and installs all dependencies
-	@cd $(REPO_ROOT) && \
-		$(PRECOMMIT) install --install-hooks --overwrite && \
-		$(PRECOMMIT) install --install-hooks --overwrite --hook-type commit-msg
-
-#
-
 $(BUILDS):
-	@cd $(REPO_ROOT) && $(CMAKE) -B $(BUILDS)
+	$(CMAKE) -S $(REPO_ROOT) -B $(REPO_ROOT)/$(BUILDS)
 
 .PHONY: config
 config: $(BUILDS) ## configure CMake
@@ -45,17 +35,11 @@ config: $(BUILDS) ## configure CMake
 
 .PHONY: build
 build: config ## runs CMake build
-	@cd $(REPO_ROOT) && $(CMAKE) --build $(BUILDS)
-
-#
-
-.PHONY: pc
-pc:  ## Runs all pre-commit hooks over all files
-	@cd $(REPO_ROOT) && $(GIT) add . && $(PRECOMMIT) run --all-files
+	$(CMAKE) --build $(REPO_ROOT)/$(BUILDS)
 
 #
 
 .PHONY: clean
 clean: ## Cleans the source tree
 	@echo "Cleaning..."
-	@cd $(REPO_ROOT) && $(RM) $(BUILDS); $(PRECOMMIT) gc
+	$(RM) $(REPO_ROOT)/$(BUILDS)
