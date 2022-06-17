@@ -48,7 +48,8 @@ function (preconfigure_ffmpeg_build)
 
     # clean first
     execute_process (COMMAND "${FFMPEG_MAKE_EXECUTABLE}" distclean
-                     WORKING_DIRECTORY "${FOLEYS_ARG_SOURCE_DIR}" COMMAND_ECHO STDOUT)
+                     WORKING_DIRECTORY "${FOLEYS_ARG_SOURCE_DIR}" 
+                     COMMAND_ECHO STDOUT)
 
     file (REMOVE_RECURSE "${FOLEYS_ARG_OUTPUT_DIR}")
 
@@ -86,8 +87,10 @@ function (preconfigure_ffmpeg_build)
     endif ()
 
     execute_process (
-        COMMAND ${ffmpeg_config_command} WORKING_DIRECTORY "${FOLEYS_ARG_SOURCE_DIR}" COMMAND_ECHO
-                                                           STDOUT COMMAND_ERROR_IS_FATAL ANY)
+        COMMAND ${ffmpeg_config_command} 
+        WORKING_DIRECTORY "${FOLEYS_ARG_SOURCE_DIR}" 
+        COMMAND_ECHO STDOUT 
+        COMMAND_ERROR_IS_FATAL ANY)
 
 endfunction ()
 
@@ -157,9 +160,13 @@ function (create_ffmpeg_build_target)
             ffmpeg INTERFACE "$<BUILD_INTERFACE:${lib_path}>"
                              "$<INSTALL_INTERFACE:${install_dest}/${libfilename}>")
 
-        install (FILES "${lib_path}" DESTINATION "${install_dest}" COMPONENT ffmpeg_${libname})
+        install (FILES "${lib_path}" 
+                 DESTINATION "${install_dest}" 
+                 COMPONENT ffmpeg_${libname})
 
-        cpack_add_component (ffmpeg_${libname} DISPLAY_NAME "FFmpeg ${libname} library" GROUP ffmpeg
+        cpack_add_component (ffmpeg_${libname} 
+                             DISPLAY_NAME "FFmpeg ${libname} library" 
+                             GROUP ffmpeg
                              DEPENDS ffmpeg_base)
     endforeach ()
 

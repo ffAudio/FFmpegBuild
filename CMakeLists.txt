@@ -146,8 +146,7 @@ install (
     DIRECTORY "${ffmpeg_output_dir}/${CMAKE_INSTALL_INCLUDEDIR}"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/ffmpeg"
     COMPONENT ffmpeg_base
-    FILES_MATCHING
-    PATTERN *.h)
+    FILES_MATCHING PATTERN *.h)
 
 target_include_directories (
     ffmpeg
@@ -160,9 +159,6 @@ cpack_add_component (ffmpeg_base HIDDEN)
 
 cpack_add_component_group (ffmpeg DISPLAY_NAME "All FFmpeg libraries" BOLD_TITLE)
 
-#
-
-# cmake-format: off
 install (
     TARGETS ffmpeg
     EXPORT FFmpegTargets
@@ -171,9 +167,9 @@ install (
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT ffmpeg_base
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT ffmpeg_base
     INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/ffmpeg")
-# cmake-format: on
 
-install (EXPORT FFmpegTargets NAMESPACE ffmpeg:: DESTINATION "${FFMPEG_INSTALL_DEST}"
+install (EXPORT FFmpegTargets NAMESPACE ffmpeg:: 
+         DESTINATION "${FFMPEG_INSTALL_DEST}"
          COMPONENT ffmpeg_base)
 
 #
