@@ -134,6 +134,11 @@ else ()
     add_feature_info ("FFmpeg universal binary" OFF "Mac universal binary build of ffmpeg")
 endif ()
 
+target_include_directories (
+    ffmpeg
+    INTERFACE "$<BUILD_INTERFACE:${ffmpeg_output_dir}/${CMAKE_INSTALL_INCLUDEDIR}>"
+              "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/ffmpeg/${CMAKE_INSTALL_INCLUDEDIR}>")
+
 add_library (ffmpeg::ffmpeg ALIAS ffmpeg)
 
 # Need to manually copy headers...
@@ -147,11 +152,6 @@ install (
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/ffmpeg"
     COMPONENT ffmpeg_base
     FILES_MATCHING PATTERN *.h)
-
-target_include_directories (
-    ffmpeg
-    INTERFACE "$<BUILD_INTERFACE:${ffmpeg_output_dir}/${CMAKE_INSTALL_INCLUDEDIR}>"
-              "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/ffmpeg/${CMAKE_INSTALL_INCLUDEDIR}>")
 
 include (CPackComponent)
 
@@ -187,3 +187,5 @@ configure_package_config_file (cmake/ffmpeg-config.cmake ffmpeg-config.cmake
 install (FILES "${CMAKE_CURRENT_BINARY_DIR}/ffmpeg-config-version.cmake"
                "${CMAKE_CURRENT_BINARY_DIR}/ffmpeg-config.cmake"
          DESTINATION "${FFMPEG_INSTALL_DEST}" COMPONENT ffmpeg_base)
+
+export (PACKAGE FFmpeg)

@@ -47,6 +47,8 @@ foreach (arch IN ITEMS x86_64 arm64)
 
     set (outputDir "${ffmpeg_output_dir}/${arch}")
 
+    file (MAKE_DIRECTORY "${outputDir}")
+
     preconfigure_ffmpeg_build (
         SOURCE_DIR "${sourceDir}" OUTPUT_DIR "${outputDir}"
         EXTRA_ARGS --enable-cross-compile --arch=${arch} "--cc=clang -arch ${arch}"
