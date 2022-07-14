@@ -7,8 +7,7 @@ project (
     VERSION 4.4.1
     DESCRIPTION "CMake build of FFmpeg"
     HOMEPAGE_URL "https://www.ffmpeg.org/"
-    LANGUAGES NONE) # FFmpeg is built using make shell commands, so within CMake we don't need to
-                    # enable any languages
+    LANGUAGES NONE) # FFmpeg is built using make shell commands, so within CMake we don't need to enable any languages
 
 enable_testing ()
 
@@ -30,16 +29,16 @@ if (APPLE)
     option (FFMPEG_MAC_UNIVERSAL_BINARY "Build a Mac universal binary" "${univ_bin_default}")
 
     unset (univ_bin_default)
+else()
+    set (FFMPEG_MAC_UNIVERSAL_BINARY OFF)
 endif ()
 
 if (PROJECT_IS_TOP_LEVEL)
-    # cmake-format: off
     set_property (
         GLOBAL PROPERTY
             USE_FOLDERS YES
             PREDEFINED_TARGETS_FOLDER Targets
             REPORT_UNDEFINED_PROPERTIES "${CMAKE_BINARY_DIR}/undefined_properties.log")
-    # cmake-format: on
 
     set (CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
     set (CMAKE_INSTALL_MESSAGE LAZY)
@@ -56,18 +55,10 @@ set (FFMPEG_INSTALL_DEST "${CMAKE_INSTALL_LIBDIR}/cmake/FFmpeg"
      CACHE STRING
            "Directory below INSTALL_PREFIX where FFmpeg CMake package files will be installed to")
 
-mark_as_advanced (FORCE FFMPEG_INSTALL_DEST)
-
-#
-
-find_program (FFMPEG_MAKE_EXECUTABLE NAMES make gmake nmake
-              DOC "Path to the make executable used for building FFmpeg")
-
-mark_as_advanced (FORCE FFMPEG_MAKE_EXECUTABLE)
-
-if (NOT FFMPEG_MAKE_EXECUTABLE)
-    message (FATAL_ERROR "Make could not be found, and is required to build FFmpeg!")
-endif ()
+find_program (FFMPEG_MAKE_EXECUTABLE 
+              NAMES make gmake nmake
+              DOC "Path to the make executable used for building FFmpeg"
+              REQUIRED)
 
 set (FFMPEG_VERSION 4.4.1 CACHE STRING "FFmpeg version")
 
@@ -77,7 +68,7 @@ set (cache_dir "${CMAKE_CURRENT_LIST_DIR}/Cache")
 
 set (FFMPEG_SOURCE_DIR "${cache_dir}/${FFMPEG_NAME}" CACHE PATH "Path to FFmpeg source code")
 
-mark_as_advanced (FORCE FFMPEG_VERSION FFMPEG_SOURCE_DIR)
+mark_as_advanced (FORCE FFMPEG_VERSION FFMPEG_SOURCE_DIR FFMPEG_MAKE_EXECUTABLE FFMPEG_INSTALL_DEST)
 
 #
 
@@ -85,19 +76,20 @@ if (NOT EXISTS "${FFMPEG_SOURCE_DIR}")
 
     set (FFMPEG_URL "https://ffmpeg.org/releases/${FFMPEG_NAME}.tar.bz2")
 
-    message (STATUS "Downloading FFmpeg sources from ${FFMPEG_URL} to ${FFMPEG_SOURCE_DIR}...")
-
     get_filename_component (FFMPEG_ARCHIVE_NAME "${FFMPEG_URL}" NAME)
 
     set (ffmpeg_tarball "${cache_dir}/${FFMPEG_ARCHIVE_NAME}")
 
-    file (DOWNLOAD "${FFMPEG_URL}" "${ffmpeg_tarball}")
+    if(NOT EXISTS "${ffmpeg_tarball}")
+        message (STATUS "Downloading FFmpeg sources from ${FFMPEG_URL} to ${FFMPEG_SOURCE_DIR}...")
+
+        file (DOWNLOAD "${FFMPEG_URL}" "${ffmpeg_tarball}")
+    endif()
+
+    message (STATUS "Unpacking ffmpeg tarball...")
 
     execute_process (COMMAND "${CMAKE_COMMAND}" -E tar xzf "${ffmpeg_tarball}"
                      WORKING_DIRECTORY "${cache_dir}")
-
-    file (REMOVE "${ffmpeg_tarball}")
-
 endif ()
 
 #
@@ -115,8 +107,6 @@ set (ffmpeg_output_dir "${CMAKE_CURRENT_BINARY_DIR}/ffmpeg")
 
 if (FFMPEG_MAC_UNIVERSAL_BINARY)
     include ("${CMAKE_CURRENT_LIST_DIR}/cmake/FFmpegMacBuild.cmake")
-
-    add_feature_info ("FFmpeg universal binary" ON "Mac universal binary build of ffmpeg")
 else ()
     message (STATUS "Configuring FFmpeg build...")
 
@@ -126,13 +116,18 @@ else ()
         unset (all_flag)
     endif ()
 
-    preconfigure_ffmpeg_build (SOURCE_DIR "${FFMPEG_SOURCE_DIR}" OUTPUT_DIR "${ffmpeg_output_dir}")
+    preconfigure_ffmpeg_build (SOURCE_DIR "${FFMPEG_SOURCE_DIR}" 
+                               OUTPUT_DIR "${ffmpeg_output_dir}")
 
-    create_ffmpeg_build_target (SOURCE_DIR "${FFMPEG_SOURCE_DIR}" OUTPUT_DIR "${ffmpeg_output_dir}"
-                                BUILD_TARGET ffmpeg_build ${all_flag})
-
-    add_feature_info ("FFmpeg universal binary" OFF "Mac universal binary build of ffmpeg")
+    create_ffmpeg_build_target (SOURCE_DIR "${FFMPEG_SOURCE_DIR}" 
+                                OUTPUT_DIR "${ffmpeg_output_dir}"
+                                BUILD_TARGET ffmpeg_build 
+                                ${all_flag})
 endif ()
+
+add_feature_info ("FFmpeg universal binary" 
+                  "${FFMPEG_MAC_UNIVERSAL_BINARY}" 
+                  "Mac universal binary build of ffmpeg")
 
 target_include_directories (
     ffmpeg
@@ -140,6 +135,12 @@ target_include_directories (
               "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/ffmpeg/${CMAKE_INSTALL_INCLUDEDIR}>")
 
 add_library (ffmpeg::ffmpeg ALIAS ffmpeg)
+
+set_property (DIRECTORY 
+              APPEND 
+              PROPERTY 
+                ADDITIONAL_CLEAN_FILES 
+                "${ffmpeg_output_dir}")
 
 # Need to manually copy headers...
 file (GLOB lib_headers ${FFMPEG_SOURCE_DIR}/lib*)
@@ -186,6 +187,7 @@ configure_package_config_file (cmake/ffmpeg-config.cmake ffmpeg-config.cmake
 
 install (FILES "${CMAKE_CURRENT_BINARY_DIR}/ffmpeg-config-version.cmake"
                "${CMAKE_CURRENT_BINARY_DIR}/ffmpeg-config.cmake"
-         DESTINATION "${FFMPEG_INSTALL_DEST}" COMPONENT ffmpeg_base)
+         DESTINATION "${FFMPEG_INSTALL_DEST}" 
+         COMPONENT ffmpeg_base)
 
 export (PACKAGE FFmpeg)

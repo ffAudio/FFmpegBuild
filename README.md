@@ -4,7 +4,9 @@ On MacOS, universal binaries are supported. (Technically, this repo's scripts bu
 
 To use FFmpeg from within a CMake project, run `cmake --install` within this directory, and then from the consuming project you can do:
 ```cmake
-find_package (FFmpeg)
+find_package (ffmpeg)
+
+target_link_libraries (yourTarget PUBLIC ffmpeg::ffmpeg)
 ```
 and it should work out of the box.
 

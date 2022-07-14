@@ -1,6 +1,6 @@
 * text=auto eol=lf encoding=utf-8 whitespace=tab-in-indent
 
 .git*                 export-ignore
-
-*.png binary
-*.jpg binary
+Cache/                export-ignore
+Builds/               export-ignore
+CMakeUserPresets.json export-ignore
