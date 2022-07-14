@@ -10,4 +10,7 @@ target_link_libraries (yourTarget PUBLIC ffmpeg::ffmpeg)
 ```
 and it should work out of the box.
 
-TO DO: Windows, iOS and Android
+Sometimes repeated builds can fail spuriously; if in doubt, try deleting your builds directory and reconfiguring.
+
+TO DO: Windows - seems to require MinGW-w64, according to https://www.ffmpeg.org/platform.html#toc-Native-Windows-compilation-using-MinGW-or-MinGW_002dw64
+TO DO: iOS and Android
