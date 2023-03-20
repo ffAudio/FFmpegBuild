@@ -60,6 +60,7 @@ function (preconfigure_ffmpeg_build)
          --disable-static
          --disable-doc
          --disable-asm
+         --disable-lzma
          --enable-shared
          --shlibdir=${FOLEYS_ARG_OUTPUT_DIR}
          --libdir=${FOLEYS_ARG_OUTPUT_DIR}
