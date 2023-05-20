@@ -55,13 +55,14 @@ function (preconfigure_ffmpeg_build)
 
     file (REMOVE_RECURSE "${FOLEYS_ARG_OUTPUT_DIR}")
 
+    # TODO: Allow option of STATIC or SHARED
     set (CONFIGURE_COMMAND
          "./configure
          --disable-static
+         --enable-shared
          --disable-doc
          --disable-asm
          --disable-lzma
-         --enable-shared
          --shlibdir=${FOLEYS_ARG_OUTPUT_DIR}
          --libdir=${FOLEYS_ARG_OUTPUT_DIR}
          --incdir=${FOLEYS_ARG_OUTPUT_DIR}/${CMAKE_INSTALL_INCLUDEDIR}
@@ -138,6 +139,8 @@ function (create_ffmpeg_build_target)
 
         set (filename "${libname}")
 
+        # TODO: Allow option of STATIC or SHARED
+
         if (CMAKE_SHARED_LIBRARY_PREFIX)
             set (filename "${CMAKE_SHARED_LIBRARY_PREFIX}${filename}")
         endif ()
@@ -154,6 +157,7 @@ function (create_ffmpeg_build_target)
 
     set (ffmpeg_libs_output_files "")
 
+    # TODO: Optional of which libs are installed
     foreach (libname IN ITEMS avutil swresample avcodec avformat swscale)
 
         __ffmpeg_make_lib_filename ("${libname}" libfilename)
