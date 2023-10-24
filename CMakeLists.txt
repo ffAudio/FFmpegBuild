@@ -164,7 +164,7 @@ set_target_properties (ffmpeg PROPERTIES
 
 target_compile_options (ffmpeg INTERFACE "$<${compiler_msvc}:/MT>")
 
-add_library (ffmpeg::ffmpeg ALIAS ffmpeg)
+add_library (FFmpeg::FFmpeg ALIAS ffmpeg)
 
 install (
     DIRECTORY "${ffmpeg_output_dir}/include"
