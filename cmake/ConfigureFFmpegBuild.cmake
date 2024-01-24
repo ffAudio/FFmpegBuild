@@ -58,8 +58,6 @@ function (preconfigure_ffmpeg_build)
     # TODO: Allow option of STATIC or SHARED
     set (CONFIGURE_COMMAND
          "./configure
-         --disable-static
-         --enable-shared
          --disable-doc
          --disable-asm
          --disable-lzma
