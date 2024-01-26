@@ -12,6 +12,8 @@ if(NOT (NUM_PROCESSORS GREATER 0))
     set (NUM_PROCESSORS 4)
 endif()
 
+option(BUILD_SHARED_LIBS "Build as shared libraries" OFF)
+
 #
 
 #[[
@@ -55,12 +57,14 @@ function (preconfigure_ffmpeg_build)
 
     file (REMOVE_RECURSE "${FOLEYS_ARG_OUTPUT_DIR}")
 
+    # TODO: Allow option of STATIC or SHARED
     set (CONFIGURE_COMMAND
          "./configure
-         --disable-static
          --disable-doc
          --disable-asm
-         --enable-shared
+         --disable-lzma
+         --disable-bzlib
+         --disable-zlib 
          --shlibdir=${FOLEYS_ARG_OUTPUT_DIR}
          --libdir=${FOLEYS_ARG_OUTPUT_DIR}
          --incdir=${FOLEYS_ARG_OUTPUT_DIR}/${CMAKE_INSTALL_INCLUDEDIR}
@@ -137,15 +141,36 @@ function (create_ffmpeg_build_target)
 
         set (filename "${libname}")
 
-        if (CMAKE_SHARED_LIBRARY_PREFIX)
-            set (filename "${CMAKE_SHARED_LIBRARY_PREFIX}${filename}")
-        endif ()
+        # TODO: Allow option of STATIC or SHARED
 
-        if (CMAKE_SHARED_LIBRARY_SUFFIX)
-            set (filename "${filename}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        if (BUILD_SHARED_LIBS)
+
+            if (CMAKE_SHARED_LIBRARY_PREFIX)
+                set (filename "${CMAKE_SHARED_LIBRARY_PREFIX}${filename}")
+            endif ()
+
+            if (CMAKE_SHARED_LIBRARY_SUFFIX)
+                set (filename "${filename}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+            endif ()
+
+            message (TRACE "Shared lib output name is ${filename}")
+
+        else ()
+
+            if (CMAKE_STATIC_LIBRARY_PREFIX)
+                set (filename "${CMAKE_STATIC_LIBRARY_PREFIX}${filename}")
+            endif ()
+
+            if (CMAKE_STATIC_LIBRARY_SUFFIX)
+                set (filename "${filename}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+            endif ()
+
+            message (TRACE "Static lib output name is ${filename}")
+
         endif ()
 
         set (${filename_out} "${filename}" PARENT_SCOPE)
+        message (STATUS "lib output name is ${filename}")
 
     endfunction ()
 
@@ -153,13 +178,14 @@ function (create_ffmpeg_build_target)
 
     set (ffmpeg_libs_output_files "")
 
+    # TODO: Optional of which libs are installed
     foreach (libname IN ITEMS avutil swresample avcodec avformat swscale)
 
         __ffmpeg_make_lib_filename ("${libname}" libfilename)
 
         set (lib_path "${FOLEYS_ARG_OUTPUT_DIR}/${libfilename}")
 
-        message (TRACE "${libname}: output path is ${lib_path}")
+        message (STATUS "${libname}: output path is ${lib_path}")
 
         list (APPEND ffmpeg_libs_output_files "${lib_path}")
 
